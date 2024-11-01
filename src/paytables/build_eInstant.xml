@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="gle-paytable-processor" basedir="." default="build">
+
+	<property name="GLEConfig.file" location="${basedir}/../../GLEConfig.xml"/>
+
+    <path id="compile.classpath">
+        <fileset dir="${project.build.directory}/dependencies">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <target name="build" depends="">
+        <echo message="[Processing paymodel files ...${project.build.directory}"/>
+        <antcall target="process-demo"/>
+        <antcall target="generate-sql"/>
+    </target>
+
+    <target name="process-demo">
+        <mkdir dir="${project.build.directory}/paytables/demo"/>
+        <copy todir="${project.build.directory}/paytables/demo" overwrite="true">
+            <fileset dir="${basedir}/demo">
+                <exclude name="GLEConfig.xml"/>
+                <exclude name="*Histo.xml"/>
+                <exclude name="build.xml"/>
+                <exclude name="200*"/>
+                <include name="*.xml"/>
+                <include name="*.xsl"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="generate-sql">
+        <taskdef name="processGleLoadScripts" classname="com.igt.interactivegame.rgs.tools.LoadScriptProcessor.ProcessGleLoadScripts">
+            <classpath refid="compile.classpath"/>
+        </taskdef>
+        <processGleLoadScripts basedir="${project.build.directory}/paytables/demo" configfile="${GLEConfig.file}" todir="${project.build.directory}/paytables"/>
+    </target>
+
+	<condition property="jvmargs" value="-Xms768m -Xmx1024m -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=1044" else="-Xms768m -Xmx1024m">
+		<equals arg1="${debug}" arg2="true" casesensitive="false"/>
+	</condition>
+
+
+</project>
